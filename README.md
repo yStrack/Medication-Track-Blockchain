@@ -11,3 +11,20 @@ A organização das Farmacias é responsável por gravar na rede dados sobre os 
 
 # Arquitetura ideal
 Uma network onde cada Organização representa um único hospital, farmácia e/ou fabricante. Dessa forma, a responsabilidade por registro dos medicamentos passa a ser do fabricante e não da farmácia. Cada Organização pode decidir o número de Peers que deseja ter. O chaincode (Smart Contract) deve ser divido, criando mais chaincodes e possivelmente mais Ledger, deixando um reponsavel pelas Receitas e outro pelos Medicamentos.
+
+# Como usar?
+Após clonar o repositóiro e estar no diretorio raiz do projeto:
+
+```
+cd med-app
+./startFabric.sh
+node enrollAdmin
+node registerUser
+```
+
+Para testes no próprio terminal, sem utilizar a interface web:
+
+```
+node invoke
+node query
+```
