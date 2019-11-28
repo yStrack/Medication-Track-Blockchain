@@ -1,0 +1,9 @@
+chaincode/.vscode
+chaincode/test
+chaincode/medication-contract@1.0.0.cds
+chaincode/.gitignore
+chaincode/.editorconfig
+chaincode/.eslintignore
+chaincode/.eslintrc.js
+bin/
+.DS_Store
