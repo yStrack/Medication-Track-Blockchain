@@ -12,7 +12,7 @@ export MSYS_NO_PATHCONV=1
 starttime=$(date +%s)
 CC_SRC_LANGUAGE=${1:-"javascript"}
 CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
-CC_SRC_PATH=github.com/chaincode
+CC_SRC_PATH=/opt/gopath/src/github.com/chaincode/
 
 # clean the keystore
 rm -rf ./hfc-key-store
@@ -101,9 +101,7 @@ cat <<EOF
 
 Total setup execution time : $(($(date +%s) - starttime)) secs ...
 
-Next, use the FabCar applications to interact with the deployed FabCar contract.
-The FabCar applications are available in multiple programming languages.
-Follow the instructions for the programming language of your choice:
+Next, use the Medication-Track applications to interact with the deployed Medication Contract.
 
 JavaScript:
 
@@ -114,17 +112,17 @@ JavaScript:
     npm install
 
   Then run the following applications to enroll the admin user, and register a new user
-  called user1 which will be used by the other applications to interact with the deployed
-  FabCar contract:
+  called user1 which will be used by the other applications to interact with the deployed 
+  contract:
     node enrollAdmin
     node registerUser
 
   You can run the invoke application as follows. By default, the invoke application will
-  create a new car, but you can update the application to submit other transactions:
+  call initLedger that creates multiple medications:
     node invoke
 
   You can run the query application as follows. By default, the query application will
-  return all cars, but you can update the application to evaluate other transactions:
+  return all medications:
     node query
 
 EOF
