@@ -15,24 +15,24 @@ class MedicationContract extends Contract {
                 name: 'Alivium',
                 fabDate: '1574973266',
                 expDate: '1665446400',
-                holderId: "sold",
-                prescription: "PES1"
+                status: "sold",
+                prescription: null
             },
             {
                 manufacturer: 'J205',
                 name: 'Floratil',
                 fabDate: '1574973266',
                 expDate: '1665446400',
-                holderId: "Drogaria02",
-                prescription: "PES2"
+                status: "stock",
+                prescription: null
             },
             {
                 manufacturer: 'J205',
                 name: 'Engov',
                 fabDate: '1574973266',
                 expDate: '1665446400',
-                holderId: "Drogaria03",
-                prescription: "PES3"
+                status: "stock",
+                prescription: null
             }
         ];
 
@@ -49,12 +49,12 @@ class MedicationContract extends Contract {
         return (!!buffer && buffer.length > 0);
     }
 
-    async createMedication(ctx, medicationId, manufacturer, name, fabDate, expDate, holderId, prescription) {
+    async createMedication(ctx, medicationId, manufacturer, name, fabDate, expDate) {
         const exists = await this.medicationExists(ctx, medicationId);
         if (exists) {
             throw new Error(`The medication ${medicationId} already exists`);
         }
-        const asset = { manufacturer, name, fabDate, expDate, holderId, prescription };
+        const asset = { manufacturer, name, fabDate, expDate, status: 'stock', prescription: null };
         const buffer = Buffer.from(JSON.stringify(asset));
         await ctx.stub.putState(medicationId, buffer);
     }
@@ -80,7 +80,7 @@ class MedicationContract extends Contract {
             throw new Error(`The medication ${medicationId} does not exist`);
         }
         const oldAsset = this.readMedication(ctx, medicationId);
-        const asset = { manufacturer: oldAsset.manufacturer, name: oldAsset.name, fabDate: oldAsset.fabDate, expDate: oldAsset.fabDate, holderId: "sold", prescription: prescriptionId };
+        const asset = { manufacturer: oldAsset.manufacturer, name: oldAsset.name, fabDate: oldAsset.fabDate, expDate: oldAsset.fabDate, status: "sold", prescription: prescriptionId };
         const buffer = Buffer.from(JSON.stringify(asset));
         await ctx.stub.putState(medicationId, buffer);
     }
@@ -134,16 +134,17 @@ class MedicationContract extends Contract {
      * 
      * @param {*} ctx 
      * @param {*} prescriptionId Identificacao da receita
-     * @param {Array} medications Lista com o nome dos medicamentos solicitados
+     * @param {Array} medications Lista de objetos com nome dos medicamentos e descricao de uso
      * @param {*} doctorId Identificacao do medico que fez a receita
      * @param {*} hospitalId Identificacao do hospital gerador da receita
      */
-    async createPresciption(ctx, prescriptionId, medications, doctorId, hospitalId) {
+    async createPresciption(ctx, prescriptionId, medications, patientId, doctorId) {
         const exists = await this.prescriptionExists(ctx, prescriptionId);
         if (exists) {
             throw new Error(`The prescription ${prescriptionId} already exists`);
         }
-        const asset = { prescriptionId, medications: medications, doctorId, hospitalId };
+        const hospitalId = "HOS01";
+        const asset = { prescriptionId, medications, patientId, doctorId, hospitalId };
         const buffer = Buffer.from(JSON.stringify(asset));
         await ctx.stub.putState(prescriptionId, buffer);
     }
