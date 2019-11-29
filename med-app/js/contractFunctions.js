@@ -10,7 +10,7 @@ const path = require('path');
 const ccpPath = path.resolve(__dirname, '..', '..', 'network', 'connection-org1.json');
 
 const functions = {
-    createMedication: async(medicationId, manufactorId, medicationName, medicationFabricationDate, medicationFabricationDate) => {
+    createMedication: async(medicationId, manufactorId, medicationName, medicationFabricationDate, medicationExpDate) => {
     try {
 
         // Create a new file system based wallet for managing identities.
@@ -39,7 +39,7 @@ const functions = {
         // Submit the specified transaction.
         // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
         // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR10', 'Dave')
-        await contract.submitTransaction('createMedication', medicationId, manufactorId, medicationName, medicationFabricationDate, medicationFabricationDate);
+        await contract.submitTransaction('createMedication', medicationId, manufactorId, medicationName, medicationFabricationDate, medicationExpDate);
         console.log('Transaction has been submitted');
 
         // Disconnect from the gateway.
@@ -120,11 +120,9 @@ const functions = {
             // Submit the specified transaction.
             // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
             // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR10', 'Dave')
-            await contract.submitTransaction('updateMedication', medicationId, prescriptionId).then(res => {
-                
-            }).catch(err => {
-                
-            })
+            const resultPrescription = await contract.submitTransaction('verifyPrescription', medicationId, prescriptionId);
+            
+            const resultMedication = await contract.submitTransaction('updateMedication', medicationId, prescriptionId);
             console.log('Transaction has been submitted');
     
             // Disconnect from the gateway.
@@ -137,4 +135,14 @@ const functions = {
     }
 }
 
-export default functions;
+
+console.log("Creating medication:");
+functions.createMedication("MED10", "FAB10", "Floratil", "1574973266", "1665446400");
+
+console.log("Creating Prescription:");
+functions.createPrescription("PES10", "MED10", "11111111111", "4444");
+
+console.log("Selling medicine");
+functions.sellMedication("MED10", "PES10");
+
+// export default functions;
