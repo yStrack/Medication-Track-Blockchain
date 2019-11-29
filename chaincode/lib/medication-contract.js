@@ -75,14 +75,19 @@ class MedicationContract extends Contract {
      * 
      */
     async updateMedication(ctx, medicationId, prescriptionId) {
-        const exists = await this.medicationExists(ctx, medicationId);
-        if (!exists) {
-            throw new Error(`The medication ${medicationId} does not exist`);
-        }
-        const oldAsset = this.readMedication(ctx, medicationId);
-        const asset = { manufacturer: oldAsset.manufacturer, name: oldAsset.name, fabDate: oldAsset.fabDate, expDate: oldAsset.fabDate, status: "sold", prescription: prescriptionId };
-        const buffer = Buffer.from(JSON.stringify(asset));
-        await ctx.stub.putState(medicationId, buffer);
+        return new Promise((resolve, reject) => {
+            const exists = await this.medicationExists(ctx, medicationId);
+            if (!exists) {
+                throw new Error(`The medication ${medicationId} does not exist`);
+            }
+            const oldAsset = this.readMedication(ctx, medicationId);
+            if (oldAsset.status == "sold") {
+                reject("Medicine has already been sold");
+            }
+            const asset = { manufacturer: oldAsset.manufacturer, name: oldAsset.name, fabDate: oldAsset.fabDate, expDate: oldAsset.fabDate, status: "sold", prescription: prescriptionId };
+            const buffer = Buffer.from(JSON.stringify(asset));
+            await ctx.stub.putState(medicationId, buffer);
+        })
     }
 
     async queryAll(ctx){
