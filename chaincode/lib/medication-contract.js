@@ -15,7 +15,7 @@ class MedicationContract extends Contract {
                 name: 'Alivium',
                 fabDate: '1574973266',
                 expDate: '1665446400',
-                status: "sold",
+                status: "stock",
                 prescription: null
             },
             {
@@ -79,7 +79,7 @@ class MedicationContract extends Contract {
             if (!exists) {
                 throw new Error(`The medication ${medicationId} does not exist`);
             }
-            const oldAsset = this.readMedication(ctx, medicationId);
+            const oldAsset = await this.readMedication(ctx, medicationId);
             if (oldAsset.status == "sold") {
                 return {
                     status: "error",
@@ -203,6 +203,46 @@ class MedicationContract extends Contract {
     async queryAllPrescription(ctx){
         const startKey = 'PES0';
         const endKey = 'PES999';
+
+        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
+
+        const allResults = [];
+        while (true) {
+            const res = await iterator.next();
+
+            if (res.value && res.value.value.toString()) {
+                console.log(res.value.value.toString('utf8'));
+
+                const Key = res.value.key;
+                let Record;
+                try {
+                    Record = JSON.parse(res.value.value.toString('utf8'));
+                } catch (err) {
+                    console.log(err);
+                    Record = res.value.value.toString('utf8');
+                }
+                allResults.push({ Key, Record });
+            }
+            if (res.done) {
+                console.log('end of data');
+                await iterator.close();
+                console.info(allResults);
+                return JSON.stringify(allResults);
+            }
+        }
+    }
+    /* ============================FUNCOES PARA VENDA==============================*/
+    async createRegister(ctx, Id, medicationId, prescriptionId){
+        const med_JSON = await this.readMedication(ctx,medicationId);
+        const pes_JSON = await this.queryPrescription(ctx,prescriptionId);
+        const medication = Buffer.from(JSON.stringify(med_JSON));;
+        const prescription = Buffer.from(JSON.stringify(pes_JSON));
+        ctx.stub.putState(Id, medication, prescription);
+    }
+
+    async queryAllSales(ctx){
+        const startKey = 'SALE1';
+        const endKey = 'SALE99';
 
         const iterator = await ctx.stub.getStateByRange(startKey, endKey);
 
