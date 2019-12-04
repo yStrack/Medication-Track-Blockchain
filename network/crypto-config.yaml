@@ -13,6 +13,8 @@ OrdererOrgs:
   - Name: Orderer
     Domain: example.com
     EnableNodeOUs: true
+    CA:
+      OrganizationUnit: TEST
     # ---------------------------------------------------------------------------
     # "Specs" - See PeerOrgs below for complete description
     # ---------------------------------------------------------------------------
@@ -33,6 +35,8 @@ PeerOrgs:
   - Name: Org1
     Domain: org1.example.com
     EnableNodeOUs: true
+    CA:
+      OrganizationUnit: TEST
     # ---------------------------------------------------------------------------
     # "Specs"
     # ---------------------------------------------------------------------------

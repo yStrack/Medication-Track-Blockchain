@@ -8,3 +8,4 @@ chaincode/.eslintrc.js
 bin/
 med-app/js/wallet
 .DS_Store
+network/fabric-samples/*

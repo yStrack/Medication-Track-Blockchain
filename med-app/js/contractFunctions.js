@@ -9,7 +9,7 @@ const path = require('path');
 
 const ccpPath = path.resolve(__dirname, '..', '..', 'network', 'connection-org1.json');
 
-const functions = {
+module.exports = {
     createMedication: async(medicationId, manufactorId, medicationName, medicationFabricationDate, medicationExpDate) => {
     try {
 
@@ -79,6 +79,7 @@ const functions = {
             // Submit the specified transaction.
             // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
             // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR10', 'Dave')
+            console.log("Sumbmiting createPrescription Transaction");
             await contract.submitTransaction('createPrescription', prescriptionId, medications, patientId, doctorId);
             console.log('Transaction has been submitted');
     
@@ -136,13 +137,12 @@ const functions = {
 }
 
 
-console.log("Creating medication:");
-functions.createMedication("MED10", "FAB10", "Floratil", "1574973266", "1665446400");
+// console.log("Creating medication:");
+// functions.createMedication("MED11", "FAB11", "Floratil", "1574973266", "1665446400").then(res => {
+//     console.log("Creating Prescription:");
+//     functions.createPrescription("PES11", "MED11", "11111111111", "4444").then(res => { 
+//         console.log("Selling medicine");
+//         functions.sellMedication("MED11", "PES11");
+//     })
+// })
 
-console.log("Creating Prescription:");
-functions.createPrescription("PES10", "MED10", "11111111111", "4444");
-
-console.log("Selling medicine");
-functions.sellMedication("MED10", "PES10");
-
-// export default functions;

@@ -75,22 +75,23 @@ class MedicationContract extends Contract {
      * 
      */
     async updateMedication(ctx, medicationId, prescriptionId) {
-        return new Promise((resolve, reject) => {
             const exists = await this.medicationExists(ctx, medicationId);
             if (!exists) {
                 throw new Error(`The medication ${medicationId} does not exist`);
             }
             const oldAsset = this.readMedication(ctx, medicationId);
             if (oldAsset.status == "sold") {
-                reject("Medicine has already been sold");
+                return {
+                    status: "error",
+                    message: "This Medications has already been sold"
+                };
             }
             const asset = { manufacturer: oldAsset.manufacturer, name: oldAsset.name, fabDate: oldAsset.fabDate, expDate: oldAsset.fabDate, status: "sold", prescription: prescriptionId };
             const buffer = Buffer.from(JSON.stringify(asset));
             await ctx.stub.putState(medicationId, buffer);
-        })
     }
 
-    async queryAll(ctx){
+    async queryAllMedication(ctx){
         const startKey = 'MED0';
         const endKey = 'MED999';
 
@@ -143,15 +144,42 @@ class MedicationContract extends Contract {
      * @param {*} doctorId Identificacao do medico que fez a receita
      * @param {*} hospitalId Identificacao do hospital gerador da receita
      */
-    async createPresciption(ctx, prescriptionId, medications, patientId, doctorId) {
+    async createPrescription(ctx, prescriptionId, medications, patientId, doctorId) {
         const exists = await this.prescriptionExists(ctx, prescriptionId);
         if (exists) {
             throw new Error(`The prescription ${prescriptionId} already exists`);
         }
         const hospitalId = "HOS01";
-        const asset = { prescriptionId, medications, patientId, doctorId, hospitalId };
+        const parsedMedication = JSON.parse(medications);
+        const asset = { prescriptionId, parsedMedication, patientId, doctorId, hospitalId };
         const buffer = Buffer.from(JSON.stringify(asset));
         await ctx.stub.putState(prescriptionId, buffer);
+    }
+
+    async verifyPrescription(ctx, medicationId ,prescriptionId) {
+        const prescriptionExists = await this.prescriptionExists(ctx, prescriptionId);
+        if (!prescriptionExists) {
+            throw new Error(`The prescription ${prescriptionId} does not exist`);
+        }
+
+        const medicationExists = await this.medicationExists(ctx, prescriptionId);
+        if (!medicationExists) {
+            throw new Error(`The prescription ${prescriptionId} does not exist`);
+        }
+
+        const medicationBuffer = await ctx.stub.getState(medicationId);
+        const prescriptionBuffer = await ctx.stub.getState(prescriptionId);
+
+        const medicationAsset = JSON.parse(medicationBuffer.toString());
+        const prescriptionAsset = JSON.parse(prescriptionBuffer.toString());
+
+        console.log("Verify prescription:")
+        console.log("Medication Asset", medicationAsset);
+        console.log("Prescription Asset", prescriptionAsset);
+        
+        // #TODO: Check if medication of given prescription has been used:
+        //  Create a relation in prescription model for each medication
+
     }
 
     async queryPrescription(ctx, prescriptionId) {
@@ -170,6 +198,38 @@ class MedicationContract extends Contract {
             throw new Error(`The prescription ${prescriptionId} does not exist`);
         }
         await ctx.stub.deleteState(prescriptionId);
+    }
+
+    async queryAllPrescription(ctx){
+        const startKey = 'PES0';
+        const endKey = 'PES999';
+
+        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
+
+        const allResults = [];
+        while (true) {
+            const res = await iterator.next();
+
+            if (res.value && res.value.value.toString()) {
+                console.log(res.value.value.toString('utf8'));
+
+                const Key = res.value.key;
+                let Record;
+                try {
+                    Record = JSON.parse(res.value.value.toString('utf8'));
+                } catch (err) {
+                    console.log(err);
+                    Record = res.value.value.toString('utf8');
+                }
+                allResults.push({ Key, Record });
+            }
+            if (res.done) {
+                console.log('end of data');
+                await iterator.close();
+                console.info(allResults);
+                return JSON.stringify(allResults);
+            }
+        }
     }
 
 }
