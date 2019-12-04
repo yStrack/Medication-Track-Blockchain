@@ -7,5 +7,6 @@ chaincode/.eslintignore
 chaincode/.eslintrc.js
 bin/
 med-app/js/wallet
+med-app/js/node_modules
 .DS_Store
 network/fabric-samples/*
