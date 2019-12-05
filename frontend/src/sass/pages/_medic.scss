@@ -1,0 +1,33 @@
+.doctor {
+    // background-color: orangered;
+    padding: 2rem 4rem;
+    margin-left: 2rem;
+    // margin-top: 2rem;
+    // width: 80%;
+
+    &__information {
+        // width: 40%;
+    }
+
+    &__medications {
+        position: relative;
+
+        &__add-button {
+            cursor: pointer;
+            color: #F9FFFF;
+            position: absolute;
+            top: 1.5rem;
+            padding: .4rem .75rem;
+            border-radius: 50%;
+            background-color: #444444;
+        }
+
+        &:last-child{
+            margin-bottom: 2rem;
+        }
+    }
+}
+
+.MuiCard-root {
+    transform: translate(-50%, 0);
+}

@@ -191,7 +191,6 @@ export default function PharmacyDashboard() {
     )
 }
 
-
 function MedicineDialog(props) {
     var { open, onClose } = props;
   
@@ -232,6 +231,7 @@ function MedicineDialog(props) {
         <DialogTitle id="prescription-dialog-title">Sell Medicine</DialogTitle>
         <DialogContent>
           <DialogContentText style={{paddingTop:20}}>
+                To sell the medicine {values.medicine} insert the prescription ID given by the patient
           </DialogContentText>
   
           <TextField 
@@ -252,4 +252,4 @@ function MedicineDialog(props) {
       </Dialog>
     )
   
-  }
+}

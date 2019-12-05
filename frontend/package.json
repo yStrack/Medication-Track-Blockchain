@@ -18,6 +18,7 @@
     "resolve-url-loader": "^3.1.0"
   },
   "scripts": {
+    "compile:sass": "sass --watch ./src/sass/main.scss ./src/style.css",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

@@ -150,8 +150,8 @@ class MedicationContract extends Contract {
             throw new Error(`The prescription ${prescriptionId} already exists`);
         }
         const hospitalId = "HOS01";
-        const parsedMedication = JSON.parse(medications);
-        const asset = { prescriptionId, parsedMedication, patientId, doctorId, hospitalId };
+        // const parsedMedication = JSON.parse(medications);
+        const asset = { prescriptionId, medications, patientId, doctorId, hospitalId };
         const buffer = Buffer.from(JSON.stringify(asset));
         await ctx.stub.putState(prescriptionId, buffer);
     }
