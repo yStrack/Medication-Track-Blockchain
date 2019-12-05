@@ -1,14 +1,16 @@
 import React from 'react';
 import { Card, TextField } from '@material-ui/core';
+import { ToastSucess, ToastErr } from "../../components/auxiliar/ToastFunction";
 
 export default function DoctorDashboard() {
     const [data,setData] = React.useState({
-        medications: [{
-            name:"",
-            dosage:"",
-        }],
-        patientId: "",
-        doctorId: ""
+      patientId: "",
+      doctorId: "",
+      medications: [{
+          name:"",
+          dosage:"",
+          description: ""
+      }],      
     })
 
     React.useEffect(() => {
@@ -25,7 +27,70 @@ export default function DoctorDashboard() {
     }
 
     const handleSubmit = () => {
-      //#TODO
+      // Validation
+      var valid = true;
+      
+      console.log("data:", data)
+      console.log("patientId:", data.patientId)
+      if(data.patientId == "" ) {
+        ToastErr("Fill all patient information", {autoClose:4500});
+        return;
+      }
+
+      if(data.patientId.length != 11) {
+        ToastErr("Use a valid CPF", {autoClose:4500});
+        return;
+      }
+
+      if(data.doctorId == "") {
+        ToastErr("Fill all doctor information", {autoClose:4500});
+        return;
+      }
+
+      data.medications.map((medication, index) => {
+        medication.dosage = medication.dosage.toString()
+        if(medication.name == "" || medication.dosage == ""){
+          valid = false;
+          ToastErr("Fill all medication information", {autoClose:4500});
+          return;
+        }
+        var temp = data.medications;
+        temp[index] = medication
+        setData({...data, medications:temp})
+      })
+
+      if(valid == true) {
+        fetch("http://localhost:5000/get_all_presc", {
+              method: "GET",
+              accept: "application/json",
+            }).then(res => {
+              res.json().then(allPrescriptions => {
+                fetch("http://localhost:5000/create_pres", {
+                  method: "POST",
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Cache': 'no-cache',
+                  }, 
+                  body: {
+                    prescriptionId: "PES" + allPrescriptions.length.toString(),
+                    medications: data.medications,
+                    patientId: data.patientId,
+                    doctorId: data.doctorId
+                  }
+                }).then(res => {
+                  console.log("res", res)
+                  res.json().then(returnData => {
+                    console.log("returnData", returnData)
+                    // Clear data #TODO
+                  })
+                })
+              })
+            }).catch(err => {
+              console.log(err)
+            })
+      
+      }
     }
 
     return (
@@ -33,14 +98,14 @@ export default function DoctorDashboard() {
         <div className="doctor">
           <div className="doctor__information">
               <TextField style={{width:"40%"}} onChange={(event) => setData({...data, patientId:event.target.value})} label="Patient's CPF" />
-              <TextField style={{width:"40%", marginLeft:"4rem"}} onChange={(event) => setData({...data, patientId:event.target.value})} label="Doctor's CRM" />            
+              <TextField style={{width:"40%", marginLeft:"4rem"}} onChange={(event) => setData({...data, doctorId:event.target.value})} label="Doctor's CRM" />            
           </div>
           {
             data.medications.map((item,index) => {
               const handleChange = (type,value) => {
                 var temp = data.medications;
                 temp[index][type] = value; 
-                setData({...value, medications: temp})
+                setData({...data, medications: temp})
               }
               return(
               <div key={index} className="doctor__medications">
@@ -49,7 +114,7 @@ export default function DoctorDashboard() {
                   <TextField label="Dosage in mg" type="number" value={data.medications[index].dosage} onChange={(event) => handleChange("dosage", event.target.value)} />
                 </div>                
                 <div className="doctor__medications__description">
-                  <TextField style={{width:"calc(80% + 4rem)", marginRight:"2rem"}} multiline label="Usage description" type="number" value={data.medications[index].dosage} onChange={(event) => handleChange("dosage", event.target.value)} />
+                  <TextField style={{width:"calc(80% + 4rem)", marginRight:"2rem"}} multiline label="Usage description" value={data.medications[index].description} onChange={(event) => handleChange("description", event.target.value)} />
                 
                   { index == data.medications.length - 1 ?
                     <a className="doctor__medications__add-button" onClick={() => handleAddMedication()}>&#43;</a>

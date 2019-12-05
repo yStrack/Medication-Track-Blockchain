@@ -41,7 +41,7 @@ module.exports = {
     var { medications } = req.body;
     const { patientId } = req.body;
     const { doctorId } = req.body;
-
+    console.log("req", req)
     try {
       await functions.createPrescription(
         prescriptionId,

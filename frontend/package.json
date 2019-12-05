@@ -15,6 +15,7 @@
     "react-scripts": "3.2.0",
     "react-select": "^3.0.8",
     "react-sidebar": "^3.0.2",
+    "react-toastify": "^5.4.1",
     "resolve-url-loader": "^3.1.0"
   },
   "scripts": {
