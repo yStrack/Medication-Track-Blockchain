@@ -2,6 +2,7 @@
     // background-color: orangered;
     padding: 2rem 4rem;
     margin-left: 2rem;
+    position: relative;
     // margin-top: 2rem;
     // width: 80%;
 
@@ -11,7 +12,7 @@
 
     &__medications {
         position: relative;
-
+        margin-top: 3rem;
         &__add-button {
             cursor: pointer;
             color: #F9FFFF;
@@ -22,9 +23,33 @@
             background-color: #444444;
         }
 
+        &__description {
+            position: relative;
+        }
+
+        &__separator {
+            position: absolute;
+            top: 8.5rem;
+            height: 1px;
+            width: calc(80% + 4rem);
+            background-color: lightgrey;
+        }
+
         &:last-child{
             margin-bottom: 2rem;
         }
+    }
+
+    &__submit-button {
+        position: absolute;
+        color: #F9FFFF;
+        bottom: 1rem;
+        left: 50%;
+        transform: translate(-50%, 0);
+        padding: 1rem 2rem;
+        border-radius: 3px;
+        cursor: pointer;
+        background-color: rgb(7, 98, 163);
     }
 }
 

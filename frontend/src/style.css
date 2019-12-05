@@ -1,9 +1,11 @@
 .doctor {
   padding: 2rem 4rem;
   margin-left: 2rem;
+  position: relative;
 }
 .doctor__medications {
   position: relative;
+  margin-top: 3rem;
 }
 .doctor__medications__add-button {
   cursor: pointer;
@@ -14,8 +16,29 @@
   border-radius: 50%;
   background-color: #444444;
 }
+.doctor__medications__description {
+  position: relative;
+}
+.doctor__medications__separator {
+  position: absolute;
+  top: 8.5rem;
+  height: 1px;
+  width: calc(80% + 4rem);
+  background-color: lightgrey;
+}
 .doctor__medications:last-child {
   margin-bottom: 2rem;
+}
+.doctor__submit-button {
+  position: absolute;
+  color: #F9FFFF;
+  bottom: 1rem;
+  left: 50%;
+  transform: translate(-50%, 0);
+  padding: 1rem 2rem;
+  border-radius: 3px;
+  cursor: pointer;
+  background-color: #0762a3;
 }
 
 .MuiCard-root {
