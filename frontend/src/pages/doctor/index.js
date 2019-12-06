@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, TextField } from "@material-ui/core";
-import { ToastSucess, ToastErr } from "../../components/auxiliar/ToastFunction";
+import { Card, TextField, CircularProgress } from "@material-ui/core";
+import { ToastSuccess, ToastErr } from "../../components/auxiliar/ToastFunction";
 import api from "../../services/api";
 
 export default function DoctorDashboard() {
@@ -13,7 +13,8 @@ export default function DoctorDashboard() {
         dosage: "",
         description: ""
       }
-    ]
+    ],
+    isCreatingPrescription:false,
   });
 
   React.useEffect(() => {
@@ -36,7 +37,6 @@ export default function DoctorDashboard() {
     var valid = true;
 
     console.log("data:", data);
-    console.log("patientId:", data.patientId);
     if (data.patientId == "") {
       ToastErr("Fill all patient information", { autoClose: 4500 });
       return;
@@ -60,20 +60,35 @@ export default function DoctorDashboard() {
         return;
       }
       var temp = data.medications;
+      temp[index].status = "Valid";
       temp[index] = medication;
       setData({ ...data, medications: temp });
     });
 
     if (valid == true) {
+      setData({...data, isCreatingPrescription:true})
       const pres = await api.get("/get_all_presc");
-      console.log(pres);
+      console.log("pres:",pres);
       const res = await api.post("/create_pres", {
         prescriptionId: "PES" + (pres.data.length + 1),
         medications: data.medications,
         patientId: data.patientId,
         doctorId: data.doctorId
       });
-      console.log(res);
+      console.log("res:", res);
+      ToastSuccess("Sucessfully created prescription for patient with CPF: " +data.patientId)
+      setData({...data, 
+        patientId: "",
+        doctorId: "",
+        medications: [
+          {
+            name: "",
+            dosage: "",
+            description: ""
+          }
+        ],
+        isCreatingPrescription:false,
+      })
     }
   };
 
@@ -95,6 +110,7 @@ export default function DoctorDashboard() {
               setData({ ...data, patientId: event.target.value })
             }
             label="Patient's CPF"
+            value={data.patientId}
           />
           <TextField
             style={{ width: "40%", marginLeft: "4rem" }}
@@ -102,6 +118,7 @@ export default function DoctorDashboard() {
               setData({ ...data, doctorId: event.target.value })
             }
             label="Doctor's CRM"
+            value={data.doctorId}
           />
         </div>
         {data.medications.map((item, index) => {
@@ -157,9 +174,13 @@ export default function DoctorDashboard() {
           );
         })}
       </div>
-      <a className="doctor__submit-button" onClick={() => handleSubmit()}>
-        Submit
-      </a>
+      { data.isCreatingPrescription == false ?
+        <a className="doctor__submit-button" onClick={() => handleSubmit()}>
+          Submit
+        </a>
+        :
+        <CircularProgress className="doctor__circular-loading" />
+      }
     </Card>
   );
 }

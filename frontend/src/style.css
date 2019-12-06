@@ -40,6 +40,12 @@
   cursor: pointer;
   background-color: #0762a3;
 }
+.doctor__circular-loading {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
 
 .MuiCard-root {
   transform: translate(-50%, 0);

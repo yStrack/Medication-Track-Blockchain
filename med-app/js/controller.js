@@ -38,10 +38,9 @@ module.exports = {
   },
   async createPrescription(req, res) {
     const { prescriptionId } = req.body;
-    var { medications } = req.body;
+    const { medications } = req.body;
     const { patientId } = req.body;
     const { doctorId } = req.body;
-    console.log("req", req)
     try {
       await functions.createPrescription(
         prescriptionId,

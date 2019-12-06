@@ -13,6 +13,7 @@ class MedicationContract extends Contract {
             {
                 manufacturer: '129R',
                 name: 'Alivium',
+                dosage: '400',
                 fabDate: '1574973266',
                 expDate: '1665446400',
                 status: "stock",
@@ -21,6 +22,7 @@ class MedicationContract extends Contract {
             {
                 manufacturer: 'J205',
                 name: 'Floratil',
+                dosage: '200',
                 fabDate: '1574973266',
                 expDate: '1665446400',
                 status: "stock",
@@ -28,7 +30,8 @@ class MedicationContract extends Contract {
             },
             {
                 manufacturer: 'J205',
-                name: 'Engov',
+                name: 'Ibuprofeno',
+                dosage: '400',
                 fabDate: '1574973266',
                 expDate: '1665446400',
                 status: "stock",
@@ -80,6 +83,7 @@ class MedicationContract extends Contract {
                 throw new Error(`The medication ${medicationId} does not exist`);
             }
             const oldAsset = await this.readMedication(ctx, medicationId);
+            const oldPrescriptionAsset = await this.queryPrescription(ctx, prescriptionId)
             if (oldAsset.status == "sold") {
                 return {
                     status: "error",
@@ -87,8 +91,22 @@ class MedicationContract extends Contract {
                 };
             }
             const asset = { manufacturer: oldAsset.manufacturer, name: oldAsset.name, fabDate: oldAsset.fabDate, expDate: oldAsset.fabDate, status: "sold", prescription: prescriptionId };
+            const newMedications = JSON.parse(oldPrescriptionAsset.medications);
+            console.log("newMedications 1:", newMedications)
+            newMedications.map((medication, index) => {
+                if(medication.name == asset.name) {
+                    medication.status = "Used";
+                }
+                newMedications[index] = medication;
+            })
+            console.log("newMedications 2:", newMedications)
+            const newPrescriptionAsset = {  prescriptionId: oldPrescriptionAsset.prescriptionId, medications: JSON.stringify(newMedications), patientId: oldPrescriptionAsset.patientId, doctorId: oldPrescriptionAsset.doctorId, hospitalId: oldPrescriptionAsset.doctorId};
+            console.log("newPrescriptionAsset:", newPrescriptionAsset)
+            newPrescriptionAsset.stock = "Used";
             const buffer = Buffer.from(JSON.stringify(asset));
+            const prescriptionBuffer = Buffer.from(JSON.stringify(newPrescriptionAsset));
             await ctx.stub.putState(medicationId, buffer);
+            await ctx.stub.putState(prescriptionId, prescriptionBuffer);
     }
 
     async queryAllMedication(ctx){

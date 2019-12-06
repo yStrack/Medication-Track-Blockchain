@@ -39,8 +39,10 @@ export default function PharmacyDashboard() {
       method: "GET",
       accept: "application/json"
     }).then(res => {
-      //   console.log("res:", res);
+        // console.log("res:", res);
       res.json().then(resData => {
+        console.log("resData:", resData);
+        
         var dataArray = [];
         resData.map((prescription, index) => {
           prescription.Record.medications = JSON.parse(
@@ -50,8 +52,10 @@ export default function PharmacyDashboard() {
             var prescriptionRecCopy = prescription.Record;
             var name = med.name;
             var description = med.description;
+            var status = med.status;
             prescriptionRecCopy.name = name;
             prescriptionRecCopy.description = description;
+            prescriptionRecCopy.status = status;
             dataArray.push({
               Key: prescription.Key,
               ...prescriptionRecCopy
@@ -125,6 +129,14 @@ export default function PharmacyDashboard() {
     {
       name: "doctorId",
       label: "Doctor CRM",
+      options: {
+        filter: false,
+        sort: false
+      }
+    },
+    {
+      name: "status",
+      label: "Status",
       options: {
         filter: false,
         sort: false

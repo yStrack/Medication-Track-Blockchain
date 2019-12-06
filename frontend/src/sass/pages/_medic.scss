@@ -51,6 +51,14 @@
         cursor: pointer;
         background-color: rgb(7, 98, 163);
     }
+
+    &__circular-loading {
+        position: absolute;
+        bottom: 1rem;
+        left: 50%;
+        transform: translate(-50%, 0);
+        
+    }
 }
 
 .MuiCard-root {

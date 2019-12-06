@@ -8,6 +8,9 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
+import api from "../../services/api";
+import { ToastErr, ToastSuccess } from '../../components/auxiliar/ToastFunction';
+
 
 export default function PharmacyDashboard() {
     const [data,setData] = React.useState({
@@ -87,6 +90,14 @@ export default function PharmacyDashboard() {
         {
             name:"name",
             label:"Medicine Name",
+            options:{
+            filter:false,
+            sort:false,
+            },
+        },
+        {
+            name:"dosage",
+            label:"Dosage",
             options:{
             filter:false,
             sort:false,
@@ -180,7 +191,7 @@ export default function PharmacyDashboard() {
 
     return (
         <div>
-            <MedicineDialog open={data.medicineDialogOpen} onClose={() => setData({...data, medicineDialogOpen:false})} medicine={data.selectedMedicine} />
+            <MedicineDialog open={data.medicineDialogOpen} onClose={() => setData({...data, medicineDialogOpen:false})} medicine={data.selectedMedicine} medications={data.medicineData}/>
             <MUIDataTable title={
                 <Typography variant="h5">
                     Medicines
@@ -196,12 +207,14 @@ function MedicineDialog(props) {
   
     const [values,setValues] = React.useState({
         medicine: props.medication,
+        allMedications: [],
         prescriptionKey: "",
+        cpf:"",
     })
   
     React.useEffect(() => {
-        if(values.medicine != props.medicine) {
-          setValues({...values, medicine: props.medicine})
+        if(values.medicine != props.medicine || values.allMedications != props.medications ) {
+          setValues({...values, medicine: props.medicine, allMedications: props.medications})
         }
     }, [props])
 
@@ -209,21 +222,61 @@ function MedicineDialog(props) {
       onClose();
     }
   
-    function handleSell() {
-        // fetch("http://localhost:5000/sell_meds",{
-        //   method:'POST',
-        //   accept:"application/json"
-        //   body: {
-        //     saleId: ;
-        //     prescriptionId: ;
-        //     medicationId ;
+    async function handleSell() {
+        console.log("click")
+        if(values.prescriptionKey == "") {
+            ToastErr("Insert a prescription key", {autoClose: 4500});
+            return;
+        }
+
+        if(values.cpf == "") {
+            ToastErr("Insert a CPF", {autoClose: 4500});
+            return;
+        }
+
+        if(values.cpf.length != 11) {
+            ToastErr("Insert a valid CPF", {autoClose: 4500});
+            return;
+        }
+
+        var prescriptions = await api.get("http://localhost:5000/get_all_presc");
         
-        //   }
-        // }).then(res => {
-        //     //#TODO
-            
-        // })
-        console.log("Medicine Key:", values.medicine)
+        var userPrescIndex = null;
+        console.log(prescriptions);
+
+        prescriptions.data.map((prescription,index) => {
+            if(prescription.Key == values.prescriptionKey ) {
+                userPrescIndex = index;
+            }
+        })
+
+        if(prescriptions.data[userPrescIndex].Record.patientId != values.cpf) {
+            ToastErr("This prescription does not belong to the given CPF", {autoClose: 4500});
+            return;
+        }
+
+        console.log("index", userPrescIndex)
+        if(userPrescIndex == null) {
+            ToastErr("There is no ", {autoClose: 4500});
+            return;
+        }
+
+        var soldCount = 0; //Count ammount of sold medication to calculate saleId
+
+        values.allMedications.map((medication,index) => {
+            console.log("medication", medication)
+            if(medication.status == "sold") {
+                soldCount++;
+            }
+        })
+
+        var res = await api.post("http://localhost:5000/sell_med", {
+            saleId: "SAL" + soldCount.toString(),
+            prescriptionId: values.prescriptionKey,
+            medicationId: values.medicine
+        })
+
+        console.log("res:", res);
     }
 
     return(
@@ -235,9 +288,17 @@ function MedicineDialog(props) {
           </DialogContentText>
   
           <TextField 
-            style={{width:"100%"}}
+            style={{width:"100%", marginTop:"3rem"}}
+            label="Prescription Key"
             value={values.prescriptionKey}
             onChange = {(event) => setValues({...values, prescriptionKey: event.target.value})}
+          />
+
+          <TextField 
+            style={{width:"100%", marginTop:"3rem"}}
+            label="Patient's CPF"
+            value={values.cpf}
+            onChange = {(event) => setValues({...values, cpf: event.target.value})}
           />
           <DialogActions>
             <Button onClick={handleClose} color="primary">
