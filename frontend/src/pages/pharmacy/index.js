@@ -277,6 +277,10 @@ function MedicineDialog(props) {
         })
 
         console.log("res:", res);
+        if(res.data.status == "ok") {
+            ToastSuccess("Medication sold");
+            handleClose();
+        }
     }
 
     return(
