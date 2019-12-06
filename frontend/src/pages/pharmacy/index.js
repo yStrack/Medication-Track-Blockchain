@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Tooltip, IconButton, TextField, Button } from '@material-ui/core';
+import { Typography, Tooltip, IconButton, TextField, Button, CircularProgress } from '@material-ui/core';
 import MUIDataTable from "mui-datatables";
 import EventNoteIcon from '@material-ui/icons/EventNote';
 import CheckIcon from '@material-ui/icons/Check';
@@ -27,12 +27,6 @@ export default function PharmacyDashboard() {
         getPharmacyMedicines()
     }, [])
 
-    React.useEffect(() => {
-        // console.log("Data updated:", data)
-        // console.log("Displayed Data:", data.displayedData)
-        
-    }, [data])
-
     const getPharmacyMedicines  = () => {
         fetch("http://localhost:5000/get_all_meds",{
           method:'GET',
@@ -53,7 +47,7 @@ export default function PharmacyDashboard() {
             })
             
             console.log("data:",resData)
-            setData({...data, medicineData: resData, displayedData:resData.slice(0,data.rowsPerPage*(data.page+1))})
+            setData({...data,medicineDialogOpen:false, medicineData: resData, displayedData:resData.slice(0,data.rowsPerPage*(data.page+1))})
           })
         })
       }
@@ -191,7 +185,7 @@ export default function PharmacyDashboard() {
 
     return (
         <div>
-            <MedicineDialog open={data.medicineDialogOpen} onClose={() => setData({...data, medicineDialogOpen:false})} medicine={data.selectedMedicine} medications={data.medicineData}/>
+            <MedicineDialog open={data.medicineDialogOpen} onClose={() => {setData({...data, medicineDialogOpen:false}); getPharmacyMedicines()}} medicine={data.selectedMedicine} medications={data.medicineData}/>
             <MUIDataTable title={
                 <Typography variant="h5">
                     Medicines
@@ -210,6 +204,7 @@ function MedicineDialog(props) {
         allMedications: [],
         prescriptionKey: "",
         cpf:"",
+        isSelling:false,
     })
   
     React.useEffect(() => {
@@ -219,11 +214,17 @@ function MedicineDialog(props) {
     }, [props])
 
     function handleClose() {
-      onClose();
+        setValues({
+            medicine: props.medication,
+            allMedications: [],
+            prescriptionKey: "",
+            cpf:"",
+            isSelling:false,
+        })
+        onClose();
     }
   
     async function handleSell() {
-        console.log("click")
         if(values.prescriptionKey == "") {
             ToastErr("Insert a prescription key", {autoClose: 4500});
             return;
@@ -238,7 +239,7 @@ function MedicineDialog(props) {
             ToastErr("Insert a valid CPF", {autoClose: 4500});
             return;
         }
-
+        setValues({...values, isSelling:true});
         var prescriptions = await api.get("http://localhost:5000/get_all_presc");
         
         var userPrescIndex = null;
@@ -250,16 +251,20 @@ function MedicineDialog(props) {
             }
         })
 
+        if(userPrescIndex == null) {
+            ToastErr("There is no prescription with the given key", {autoClose: 4500});
+            setValues({...values, isSelling:false});
+            return;
+        }
+
         if(prescriptions.data[userPrescIndex].Record.patientId != values.cpf) {
             ToastErr("This prescription does not belong to the given CPF", {autoClose: 4500});
+            setValues({...values, isSelling:false});
             return;
         }
 
         console.log("index", userPrescIndex)
-        if(userPrescIndex == null) {
-            ToastErr("There is no ", {autoClose: 4500});
-            return;
-        }
+        
 
         var soldCount = 0; //Count ammount of sold medication to calculate saleId
 
@@ -281,6 +286,11 @@ function MedicineDialog(props) {
             ToastSuccess("Medication sold");
             handleClose();
         }
+        else{
+            ToastErr("Error on sell", {autoClose:4500});
+            setValues({...values, isSelling:false});
+        }
+        setValues({...values, isSelling:true});
     }
 
     return(
@@ -308,9 +318,13 @@ function MedicineDialog(props) {
             <Button onClick={handleClose} color="primary">
               Close
             </Button>
-            <Button onClick={handleSell} color="primary">
-              Sell
-            </Button>
+            { values.isSelling == false ? 
+                <Button onClick={handleSell} color="primary">
+                Sell
+                </Button>
+            :
+                <CircularProgress />
+            }
           </DialogActions>
   
         </DialogContent>
